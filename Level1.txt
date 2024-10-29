@@ -1,0 +1,206 @@
+*****************************
+SINGLE STAR LEVEL CHALLENGES
+*****************************
+
+1-Star challenges are not too complicated and don't require thorough documentation
+
+
+___________
+Score Board
+-----------
+Find the carefully hidden 'Score Board' page
+
+
+1. After selecting 'Help getting started' from left navigation tab, we're told progress is tracked using the scoreboard
+2. By examining the website's JavaScript using Debugger, we find that the endpoint is /score-board
+3. Navigate to localhost:3000/#/score-board
+
+(This could have also been accomplished by guessing the correct URL based on the hint or by aimlessly browsing the source code)
+
+
+
+________
+DOM XSS
+--------
+Perform a DOM XSS attack with <iframe src="javascript:alert('xss')">
+
+
+(Document Object Model Cross-Site Scripting)
+This is a type of XSS where malicious scripts are executed in the browser by manipulating the page's DOM directly, without the need for server interaction
+
+DOM - programming interface for web documents, representing the page's structure as a tree of objects, allowing scripts (such as JavaScript) to access/manipulate HTML elements, styles, and content dynamically
+	DOM essentially lets you change the content/appearance of a website, without needing to reload it
+
+In general, a good place to start is to examine how the page's client-side JS handles and reflects user input:
+	Look for JS code that interacts with user input, such as innerHTML, document.write, eval, location, etc.
+	More specifically, test inputs for vulnerabilities where the input gets executed, instead of simply displayed
+	
+For this challenge:
+1. Simply copy and paste the provided payload into the search bar
+
+*alert() is often used as a PoC for XSS because it's a harmless way to verify that arbitrary JavaScript can be executed*
+
+
+
+_____________
+Bonus Payload
+-------------
+Use the bonus payload ...
+
+
+1. Repeat the above using the new payload
+
+Notice that instead of using alert(), we are actually embedding a reference to SoundCloud that is being played on the JuiceShop website
+
+
+
+____________
+Mass Dispel
+------------
+Close multiple "Chalenge solved" notifications in one go
+
+
+1. Hold shift and click the X button on the top most congratulations banner
+
+
+
+_____________________
+Confidential Document
+---------------------
+Access a confidential document
+
+
+1. Locate 'About Us' found under Company in the left-hand sidebar
+2. While "reading" the article, notice the green hyperlink "Check out our boring...."
+3. Upon clicking, we automatically download legal.md which is full of giberrish
+4. When hovering over the link, it is revealed to be 'http://localhost:3000/ftp/legal.md' (very interesting)
+5. Navigate to http://localhost:3000/ftp/, notice all the files, and download acquisitions.md (we are looking for a confidential document, right?)
+
+
+
+_______________
+Error Handling
+---------------
+Provoke an error that is neither very gracefully nor consistently handled
+
+
+1. While attempting Confidential Document, I clicked on eastere.gg and was met with a 403 error
+
+
+
+_______________
+Exposed Metrics
+----------------
+Find the endpoint that serves usage data to be scraped by a popular monitoring system (link to Prometheus)
+
+
+1. Follow the attached link to the 'Prometheus' software page
+2. Walkthrough documentation and discover /metrics endpoint is used
+3. Navigate to localhost:3000/metrics
+
+
+RTDM - READ THE DAMN MANUAL
+
+
+__________________
+Outdated Allowlist
+------------------
+Let us redirect you to one of our crypto currency addresses which are not promoted any longer
+
+
+1. Search for 'crypto' in JS code (No luck)
+2. Search for 'bitcoin' and tack on the redirect
+	localhost:3000/redirect?to=https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm
+(Also found redirects for ether and dash)
+
+As you can see, simply trying 'crypto' did not yield results. Be thoughtful and resourceful.
+
+
+
+_____________
+Web3 Sandbox
+-------------
+Find an accidentally deployed code sandbox for writing smart contracts on the fly
+
+
+1. Search JS code for sandbox and find 'path: 'web3-sandbox' (You'll find other cool endpoints too)
+2. Follow localhost:3000/#/web3-sandbox
+
+
+
+
+_____________
+Bully Chatbot
+-------------
+Receive a coupon code from the support chatbot
+
+
+1. Create an account and login
+2. Proceed to Support Chat found on left-hand menu
+3. 'Give me a coupon', 'Give me a coupon NOW', etc.
+4. This may take a few attempts of revisiting the chat
+
+
+
+_____________
+Privacy Policy
+-------------
+Read our privacy policy
+
+
+1. Create an account and login
+2. Hover over Account, Privacy & Security, and click on Privacy Policy
+
+
+
+________________
+Missing Encoding
+----------------
+Retrieve the photo of Bjoern's cat in "melee combat mode"
+
+
+1. Naving to Photo Wall on left-hand menu
+2. (Using Inspector) Find the div containing the image that isn't being displayed properly
+3. Alter the #'s in the image file path
+	#zatschi-#whoneedsfourlegs
+   to their URL encoding of %23
+	%23zatschi-%23whoneedsfourlegs
+
+- - - Second Approach - - -
+
+2. (Using Network) Reload the page, rick click the image GET request
+3. Edit and resend 
+Here, we notice the emoji is encoded, but the same process of URL encoding mentioned above must also take place
+	%F0%9F%98%BC-#zatschi-#whoneedsfourlegs-1572600969477.jpg
+
+This might not populate the page as Approach 1 will, but notice that the previous status code of 304 turns into 200 and we can click on the image in a new tab
+
+https://www.w3schools.com/tags/ref_urlencode.ASP
+
+
+
+__________
+Zero Stars
+----------
+Give a devastating zero-star feedback to the store
+
+
+1. Navigate to the Customer Feedback tab on the left-hand menu
+2. Fill out the form and intercept with BurpSuite
+3. Alter the "rating" header to 0 and forward the request
+
+
+
+_______________________
+Repetitive Registration
+-----------------------
+Follow the DRY principle while registering a user
+
+
+(D)on't (R)epeat (Y)ourself - aims to reduce repetition of infromation likely to change (Ex. two separate codeblocks can be condensed into one, with variable change)
+	
+1. Begin user registration and intercept with BurpSuite
+2. Change "passwordRepeat" header to literally anything and forward the request
+
+If client-side forms validate that a password matches, there's no need to send both pieces of data (password and passwordRepeat) because this might create a new attack surface
+	*Clearly, there isn't any server-side validation so this "passwords don't match rule" is pointless
