@@ -1,0 +1,169 @@
+___________
+Login Admin
+------------
+Log in with the administrator's user account
+
+1. Find admin email under a juice posting (admin@juice.sh-op)
+2. Proceed to login page with this username and intercept the request in burp
+	SQL Injection email= "admin@juice.sh-op' OR 1=1; --" worked!
+
+I think this challenge was just a basic test of my abilities, future challenges
+	expect this login using a specific method
+
+_____________
+Admin Section
+-------------
+Access the administration section of the store
+
+1. Browse through the main.js using Debugger for anything admin-related
+2. Find endpoint /administration....localhost:30000/#/administration
+
+I've noticed a big part of testing is to toy around and examine the ins and outs
+of the application
+
+
+
+______________
+Reflected XSS
+--------------
+Perform a reflected XSS attack with <iframe src="javascript:alert(`xss`)">.
+
+Basically, a reflected XSS attack occurs when an application receives data in an HTTP request and includes
+the data within the immediate response in an unsafe way, aka displaying a param value on the webpage itself
+
+*Inputs are directly REFLECTED on the output page*
+
+1. The hint tells us "Look for a URL param value that is displayed on the page itself
+2. We are currently logged in as the administrator, but if we navigate to Order History,
+	we see that the actual order # appears as a parameter in the website's URL
+3. Simply replace this id value with the payload and the reflected attack is successul.
+
+http://localhost:3000/#/track-result?id=<iframe src="javascript:alert(`xss`)">
+
+Surprisingly, I did not need any URL encoding, which may be a check in a more sophisticated web app
+
+
+_________________
+Password Strength
+-----------------
+Log in with the administrator's user credentials without previously changing them or applying SQL Injection.
+
+1. Intercept a loging request using Burp and send to Intruder
+2. Using the fern-wifi common.txt wordlist, we notice that the response length varies significantly for 'admin123'
+3. Sign in
+
+(Sidenote: Checkout 'Fern Wi-Fi Cracker' tool
+
+
+_______________________
+Empty User Registration
+-----------------------
+Register a user with an empty email and password.
+
+1. Using burp, intercept a request to create a new account
+2. Set the username and password fields to be blank fields
+
+
+
+____________
+View Basket
+------------
+View another user's shopping basket.
+
+1. Login to your own account
+2. Intercept a request to 'Your Basket'
+3. Change the bucket value in:
+	GET /rest/basket/6 HTTP/1.1
+
+
+__________________
+Five-Star Feedback
+------------------
+Get rid of all 5-star customer feedback.
+
+1. Login as administrator and delete all 5-star reviews
+
+
+
+_________________
+Meta Geo Stalking
+-----------------
+Determine the answer to John's security question by looking at an upload of him to the Photo Wall 
+and use it to reset his password via the Forgot Password mechanism.
+
+
+1. Find j0hNny's photo on the photo wall and download it
+	http://localhost:3000/assets/public/images/uploads/favorite-hiking-place.png
+2. Use website https://www.metadata2go.com to find GPS coordinates
+	36 deg 57' 31.38" N, 84 deg 20' 53.58" W 
+3. Input values into https://www.gps-coordinates.net/
+	Address falls near Scuttlehole Trailhead in Kentucky
+4. Go through different products until you find John's username
+(I was too lazy and just guessed it would be john@juice-sh.op
+5. His security question: "Where is my favorite place to go hiking?"
+	The Trailhead wasn't working so through trial and error, Daniel Boone National Forest
+
+
+
+___________________
+Visual Geo Stalking
+-------------------
+Determine the answer to Emma's security question by looking at an upload of her to the Photo Wall 
+and use it to reset her password via the Forgot Password mechanism.
+
+
+1. Find Emma's photo on the wall and observe it:
+	http://localhost:3000/assets/public/images/uploads/IMG_4253.jpg
+2. Emma's security question: Company you first worked for as an adult
+3. Notice in a window of the building in the photo is a sign with 'ITSec' on it
+4. Use this to change the password (it could've been ITsec, I can't fully remember, but same difference)
+
+
+
+
+_______________
+Security Policy
+---------------
+Behave like any "white-hat" should before getting into the action.
+
+
+.well-known" directory is frequently employed in web-based protocols to retrieve "site-wide metadata"
+related to a host before initiating a request
+
+1. Browsed to https://github.com/juice-shop/juice-shop/security/policy
+2. They follow the proposed Internet standard: https://securitytxt.org/
+3. Based on this strucutre, navigate to http://localhost:3000/.well-known/security.txt
+
+
+
+
+____________________
+Deprecated Interface
+--------------------
+This one took a lot of researching/orienting myself with exactly what needed to be done.
+
+1. Search B2B in main.js
+2. We see under the complaint section (Important to note):
+	'Input area for uploading a single invoice PDF or XML B2B order file or a ZIP archive 
+	containing multiple invoices or orders<!---->',
+However, when navigating to complaint, we can only upload PDF or ZIP files...we need to find a way to upload
+	a B2B order...
+
+3. We can bypass the submission for a B2B order, by renaming a file test.xml to test.xml.pdf; changing
+	the extension does not change the file type, as that is dependent on file structure.
+
+4. We intercept this request using Burp and simple change the name back to test.xml
+	Content-Disposition: form-data; name="file"; filename="test.xml"
+
+The allowed upload MIME types include XML, even though the complaint tab itself "doesn't"
+
+This challenge taught me to keep my eyes open for anything and everything.
+
+
+
+
+
+
+By exploring the About Us page, we see this comment that had gotten left behind:
+	Please send me the juicy chatbot NFT in my wallet at /juicy-nft : 
+	"purpose betray marriage blame crunch monitor spin slide donate sport lift clutch" (***ereum@juice-sh.op)

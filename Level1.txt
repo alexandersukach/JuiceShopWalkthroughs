@@ -204,3 +204,6 @@ Follow the DRY principle while registering a user
 
 If client-side forms validate that a password matches, there's no need to send both pieces of data (password and passwordRepeat) because this might create a new attack surface
 	*Clearly, there isn't any server-side validation so this "passwords don't match rule" is pointless
+
+
+
